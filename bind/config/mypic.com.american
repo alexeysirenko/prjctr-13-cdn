@@ -1,0 +1,10 @@
+mypic.com. 300 IN SOA mypic.com. hostmaster.mypic.com. (
+        1 ; serial
+        1800 ; refresh (30 minutes)
+        600 ; retry (10 minutes)
+        604800 ; expire (1 week)
+        300 ; minimum (5 minutes)
+)
+mypic.com. 300 IN NS mypic.com.
+mypic.com. 300 IN A 172.30.0.10
+*.mypic.com. 300 IN A 172.30.0.10

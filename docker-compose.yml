@@ -1,0 +1,97 @@
+services:
+  bind:
+    image: ubuntu/bind9:latest
+    environment:
+      - BIND9_USER=root
+    container_name: bind
+    ports:
+      - "1053:53/udp"
+      - "1053:53/tcp"
+    volumes:
+      - ./bind/config:/etc/bind:rw
+      - ./cache:/var/cache/bind
+      - ./records:/var/lib/bind
+    depends_on:
+      - lb1_america
+      - lb2_world
+    networks:
+      cdn_net:
+        ipv4_address: 172.30.0.2
+    restart: unless-stopped
+
+  lb1_america:
+    image: haproxy:latest
+    container_name: lb1_america
+    ports:
+      - "80:80"
+    volumes:
+      - ./haproxy/lb1-america.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - node1
+      - node2
+    networks:
+      cdn_net:
+        ipv4_address: 172.30.0.10
+    restart: unless-stopped
+
+  lb2_world:
+    image: haproxy:latest
+    container_name: lb2_world
+    ports:
+      - "8080:80"
+    volumes:
+      - ./haproxy/lb2-world.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - node3
+      - node4
+    networks:
+      cdn_net:
+        ipv4_address: 172.30.0.11
+    restart: unless-stopped
+
+  node1:
+    image: nginx:latest
+    container_name: node1
+    volumes:
+      - ./images:/usr/share/nginx/html:ro
+    networks:
+      cdn_net:
+        ipv4_address: 172.30.0.20
+    restart: unless-stopped
+
+  node2:
+    image: nginx:latest
+    container_name: node2
+    volumes:
+      - ./images:/usr/share/nginx/html:ro
+    networks:
+      cdn_net:
+        ipv4_address: 172.30.0.21
+    restart: unless-stopped
+
+  node3:
+    image: nginx:latest
+    container_name: node3
+    volumes:
+      - ./images:/usr/share/nginx/html:ro
+    networks:
+      cdn_net:
+        ipv4_address: 172.30.0.22
+    restart: unless-stopped
+
+  node4:
+    image: nginx:latest
+    container_name: node4
+    volumes:
+      - ./images:/usr/share/nginx/html:ro
+    networks:
+      cdn_net:
+        ipv4_address: 172.30.0.23
+    restart: unless-stopped
+
+networks:
+  cdn_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
