@@ -1,0 +1,3 @@
+mypic.com/1.jpg
+mypic.com/2.jpg
+mypic.com/3.jpg
