@@ -1,4 +1,8 @@
-# Cluster Setup
+# Custom CDN
+
+This is an attempt to build a test CDN network, sets up a docker cluster with a custom DNS, which redirects
+you to a zone-specific load balancer based on your IP address. To simulate requests from different IPs
+two separate client containers are set up, "world" and "America".
 
 ## Start the cluster
 
@@ -43,3 +47,19 @@ docker exec -it client-america siege -t5S -f /data/urls.txt
 | :------------------ | :-----------: | :----------------: |
 | Transactions        |     2971      |        720         |
 | Longest transaction |     0.13      |        0.56        |
+
+## Testing performance with different load balancing strategies
+
+- Using `wrk` instead of `siege` for higher concurrency
+- Using only american load balancer to avoid caching
+- Adjustments are made by setting a `balance` section in the Haproxy config file
+
+```bash
+docker exec -it client-america wrk -c1000 -t10 -d5s http://mypic.com/1.jpg
+```
+
+| balance          | round robin | leastconn | random |
+| :--------------- | :---------: | :-------: | :----: |
+| Requests         |    3125     |   3128    |  3093  |
+| Latency, s (avg) |    1.26     |   1.34    |  1.30  |
+| Latency, s (max) |    2.00     |   1.97    |  2.00  |
